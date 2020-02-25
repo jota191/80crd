@@ -23,24 +23,26 @@ val rec printList
 
 
 local
-  fun crdLn stream linum =
+  fun crdLn filename stream linum =
       case TextIO.inputLine stream of
-          SOME line  => (if size line > (!WIDTH)
-                         then print (Int.toString linum ^ ":" ^ line )
-                         else crdLn stream (linum + 1))
-        | _ => crdLn stream (linum + 1)
+          SOME line
+          => (if size line > (!WIDTH)
+              then (print (filename ^ ":" ^ Int.toString linum ^ ":" ^ line);
+                    crdLn filename stream (linum + 1))
+              else crdLn filename stream (linum + 1))
+        | NONE => ()
 
 in
-    fun cdr filename =
+    fun cdr (filename : string) : unit =
         let
             val i_stream = TextIO.openIn filename
         in
-            crdLn i_stream 1
+            crdLn filename i_stream 1
         end
 end;
 
 val main
-    = cook_args (CommandLine.arguments ()); print (Int.toString (!WIDTH));
+    = cook_args (CommandLine.arguments ());
       map cdr (!FILES);
  
 main;
