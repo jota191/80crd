@@ -1,5 +1,29 @@
 val WIDTH = ref 80;
 val FILES : string list ref = ref [];
+val PRINTING : bool ref = ref false;
+
+fun has_TODO (line : string) : string option =
+    case explode line of
+        (#"T" :: #"O" :: #"D" :: #"O" :: xs) => SOME line
+      | (x :: xs)  => has_TODO (implode xs)
+      | []         => NONE; 
+
+fun has_FIXME (line : string) : string option =
+    case explode line of
+        (#"F" :: #"I" :: #"X" :: #"M" :: #"E" :: xs) => SOME line
+      | (x :: xs)  => has_FIXME (implode xs)
+      | []         => NONE;
+
+local
+    fun read_until_dot_lst (line : char list) : unit =
+        case line of
+            (#"." :: xs) => PRINTING := false
+          | (x    :: xs) => (print (implode (x::[])); read_until_dot_lst xs)
+          | [] => PRINTING := false
+in
+fun read_until_dot (line : string) : unit =
+    read_until_dot_lst (explode line);
+end;
 
 fun cook_arg arg =
     case (explode arg) of
@@ -10,7 +34,7 @@ fun cook_arg arg =
       | _  => FILES := arg :: (!FILES);
 
 fun cook_args args =
-    map cook_arg args
+    map cook_arg args;
 
 local
     fun crdLn filename stream linum =
